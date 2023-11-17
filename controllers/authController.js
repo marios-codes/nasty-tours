@@ -12,6 +12,18 @@ const signToken = (id) => {
   });
 };
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -22,15 +34,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     role: req.body.role,
   });
 
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -53,11 +57,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 4) If everything is OK send the token to the client
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -192,11 +192,31 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   await user.save(); // we don't want to turn off the validators this time as in userSchema we have a validator that checks if password and confirmPassword patch before save.
 
-  // 3) Update changedPasswordAt property for the user
+  // 3) Update changedPasswordAt property for the user is done on the presave middleware function on userModel.js
   // 4) Log the user in, send JWT
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from the collection
+  const user = await User.findById(req.user.id).select('+password'); // We use select with a '+' to select a field from the database which by default is not selected
+
+  // 2) Check if POSTed password is correct
+  // Compare the hashed password in our database against user's input password AFTER checking if the user exists in our database
+  if (
+    !(await user.isCorrectPassword(req.body.passwordCurrent, user.password))
+  ) {
+    return next(new AppError('Your current password is wrong', 401));
+  }
+
+  // 3) If so, update password in our database
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+
+  await user.save(); // we don't want to turn off the validators this time as in userSchema we have a validator that checks if password and confirmPassword patch before save.
+  // User.findByIdAndUpdate will NOT work as intended!
+
+  // Updated changedPasswordAt property for the user is done on the presave middleware function on userModel.js
+  // 4) Log the user in, send JWT
+  createSendToken(user, 200, res);
 });
