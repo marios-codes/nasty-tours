@@ -13,8 +13,10 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 router.patch(
   '/updateMyPassword',
   authController.protect,
-  authController.updatePassword
+  authController.updateMyPassword
 );
+
+router.patch('/updateMe', authController.protect, userController.updateMe);
 
 router
   .route('/')
