@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a password'],
     minlength: 8,
-    select: false,
+    select: false, // we don't want to return this field in any query by default.
   },
   passwordConfirm: {
     type: String,
@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false, // we don't want to return this field in any query by default.
+  },
 });
 
 // Document middleware: runs before .save() and .create() methods
@@ -64,6 +69,13 @@ userSchema.pre('save', function (next) {
   // where we subtract 1 sec(1000ms) from passwordChangedAt's time creation
   // so that we are sure it is always earlier than the jwt's time
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  // run this query middleware in every query that starts with "find"
+  // "this" points out to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 

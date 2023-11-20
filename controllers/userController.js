@@ -48,6 +48,13 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', data: { user: updatedUser } });
 });
 
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  // We actually want to mark the current user's account as inactive, so...
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+
+  res.status(204).json({ status: 'success', data: null });
+});
+
 exports.getUser = (req, res) => {
   res
     .status(500)
