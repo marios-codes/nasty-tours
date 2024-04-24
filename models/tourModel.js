@@ -143,6 +143,15 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    // populate() fetches the referenced objects and populates the specified field
+    path: 'guides',
+    select: '-__v -passwordChangedAt -passwordResetExpires -passwordResetToken',
+  });
+  next();
+});
+
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`This query took ${Date.now() - this.start} milliseconds`);
   // console.log(docs);
