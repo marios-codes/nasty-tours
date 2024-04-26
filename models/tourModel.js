@@ -10,7 +10,7 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A tour must have a name'],
       unique: true,
-      maxlength: [40, 'A tour name must be at least 40 characters'],
+      maxlength: [40, 'A tour name must be at most 40 characters'],
       minlength: [10, 'A tour name must be at least 10 characters'],
       // validate: [validator.isAlpha, 'A tour name must contain only letters'], //an example of how to use an external validation library
     },
@@ -36,7 +36,7 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
       min: [1.0, 'A rating must be above 1.0'],
-      max: [5.0, 'A rating must below 5.0'],
+      max: [5.0, 'A rating must be below 5.0'],
     },
     ratingsQuantity: { type: Number, default: 0 },
     price: { type: Number, required: [true, 'A tour must have a price'] },
@@ -111,6 +111,13 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Virtual Populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', // the name of the field in the other model that we want to connect, in our case in the Review model
+  localField: '_id', // the name of the field in this model
+});
+
 // Document middleware: runs before .save() and .create() methods
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
@@ -152,7 +159,7 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
-tourSchema.post(/^find/, function (docs, next) {
+tourSchema.post(/^find/, function (doc, next) {
   console.log(`This query took ${Date.now() - this.start} milliseconds`);
   // console.log(docs);
   next();
