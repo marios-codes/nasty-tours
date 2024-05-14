@@ -2,7 +2,11 @@ const express = require('express');
 const reviewController = require('../controllers/reviewController');
 const authController = require('../controllers/authController');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true }); // we set mergeParams to true in order to have access to the tourId on tourRoutes.js in the reviewRoutes middleware
+
+// POST /reviews
+// POST /tour/3124bby/reviews
+// GET /tour/3124bby/reviews
 
 router
   .route('/')
