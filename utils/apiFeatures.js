@@ -1,20 +1,27 @@
+// A class to "translate" the request query we get from express to a mongoose query
+// so we can fetch the results specified in the request query from our MongoDB
+
 class APIFeatures {
+  // query = mongoose query(ie Model.find()) and queryString is the string we get from req.query (from express)
   constructor(query, queryString) {
     this.query = query;
     this.queryString = queryString;
   }
 
   filter() {
-    const queryObj = { ...this.queryString };
+    // 1) Filtering
+    const queryObj = { ...this.queryString }; // we need a hard copy of the rew.query object and not a reference to it
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
+    // 2) Advanced Filtering
+    // We want to replace the gte, gt,lte,lt with $gte, $gt etc
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
     this.query = this.query.find(JSON.parse(queryStr));
 
-    return this;
+    return this; // We simply return the entire Object
   }
 
   sort() {
