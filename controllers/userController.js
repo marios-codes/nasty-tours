@@ -13,6 +13,12 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
+exports.getMe = (req, res, next) => {
+  // middleware so we can use the getOne() method from handler factory
+  req.params.id = req.user.id;
+  next();
+};
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user's request contains a password change
   if (req.body.password || req.body.passwordConfirm) {

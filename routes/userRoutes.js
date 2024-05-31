@@ -16,6 +16,12 @@ router.patch(
   authController.updateMyPassword
 );
 
+router.get(
+  '/me',
+  authController.protect,
+  userController.getMe, // use this middleware to get the current user id
+  userController.getUser
+);
 router.patch('/updateMe', authController.protect, userController.updateMe);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
