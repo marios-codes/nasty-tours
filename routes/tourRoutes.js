@@ -6,7 +6,6 @@ const reviewRouter = require('./reviewRoutes');
 const router = express.Router();
 
 // Add review routes middleware
-
 router.use('/:tourId/reviews', reviewRouter);
 
 router
@@ -21,6 +20,12 @@ router
     authController.restrictTo('admin', 'lead-guide', 'guide'),
     tourController.getMonthlyPlan
   );
+
+router
+  .route('/tour-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin); // /tour-within/230/center/40,45/unit/mi
+
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
 router
   .route('/')

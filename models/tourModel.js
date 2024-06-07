@@ -111,6 +111,7 @@ const tourSchema = new mongoose.Schema(
 // Set the price field to be indexed in MongoDB for read performance
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' }); // index for an earth like sphere
 
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
@@ -171,12 +172,12 @@ tourSchema.post(/^find/, function (doc, next) {
 });
 
 // AGGREGATION middleware
-tourSchema.pre('aggregate', function (next) {
-  // this refers to the aggregation object and pipeline() returns the pipeline object.
-  // We want to add a match operation to the beggining of the pipeline in order to hide the secret tours
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   // this refers to the aggregation object and pipeline() returns the pipeline object.
+//   // We want to add a match operation to the beggining of the pipeline in order to hide the secret tours
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 
