@@ -25,32 +25,61 @@ const handleJsonWebTokenError = (err) =>
 const handleTokenExpiredError = (err) =>
   new AppError('your token has expired. Please login again.', 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
+const sendErrorDev = (err, req, res) => {
+  // Check if it is an API error or a server side page rendering error
+  // to send the corresponding response, so
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    // API
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+  // B) Render the error page
+  console.error('ERROR', err);
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: err.message,
   });
 };
 
-const sendErrorProd = (err, res) => {
-  // Operational or trusted error => send it to the client
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
-  } else {
-    // Programming or other unkown error => don't leak the details to the client
+const sendErrorProd = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    if (err.isOperational) {
+      // a) Operational or trusted error => send it to the client
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+    // b) Programming or other unkown error => don't leak the details to the client
     // 1) Log the error
     console.error('ERROR', err);
     // 2) Send generic error message
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Something went wrong',
     });
   }
+  // B) Render the error page
+  if (err.isOperational) {
+    // a) Operational or trusted error => send it to the client
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      msg: err.message,
+    });
+  }
+  // b) Programming or other unkown error => don't leak the details to the client
+  console.error('ERROR', err);
+  // Send generic error message
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong',
+    msg: 'Please try again later.',
+  });
 };
 
 module.exports = (err, req, res, next) => {
@@ -58,7 +87,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = Object.create(err);
     if (error.name === 'CastError') error = handleCastErrorDB(err);
@@ -67,7 +96,7 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError();
     if (error.name === 'TokenExpiredError') error = handleTokenExpiredError();
 
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 
   next();
