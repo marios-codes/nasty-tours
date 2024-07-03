@@ -1,10 +1,11 @@
 /* eslint-disable */
-import { login } from './login';
+import { login, logout } from './login';
 import { displayMap } from './leaflet';
 
 // DOM Elements
 const leaflet = document.getElementById('map');
 const loginForm = document.querySelector('.form');
+const logOutBtn = document.querySelector('.nav__el--logout');
 
 // Delegation
 if (leaflet) {
@@ -21,3 +22,5 @@ if (loginForm) {
     login(email, password);
   });
 }
+
+if (logOutBtn) logOutBtn.addEventListener('click', logout);
