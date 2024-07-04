@@ -44,3 +44,11 @@ exports.getLoginForm = (req, res) => {
       title: 'Log into your account',
     });
 };
+
+exports.getAccount = (req, res) => {
+  // we don't need next() or anything as we get the user
+  // from the protect middleware in viewRoutes
+  res.status(200).render('account', {
+    title: 'Your account',
+  });
+};
