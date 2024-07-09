@@ -592,6 +592,8 @@ const leaflet = document.getElementById("map");
 const loginForm = document.querySelector(".form--login");
 const logOutBtn = document.querySelector(".nav__el--logout");
 const settingsForm = document.querySelector(".form-user-data");
+const passwordForm = document.querySelector(".form-user-password");
+const savePasswordBtn = document.querySelector(".btn--save-password");
 // Delegation
 if (leaflet) {
     // Get locations from HTML
@@ -609,7 +611,26 @@ if (settingsForm) settingsForm.addEventListener("submit", (element)=>{
     element.preventDefault();
     const email = document.getElementById("email").value;
     const name = document.getElementById("name").value;
-    (0, _updateSettings.updateData)(name, email);
+    (0, _updateSettings.updateSettings)({
+        name,
+        email
+    }, "data");
+});
+if (passwordForm) passwordForm.addEventListener("submit", async (element)=>{
+    element.preventDefault();
+    savePasswordBtn.textContent = "Updating...";
+    const passwordCurrent = document.getElementById("password-current").value;
+    const password = document.getElementById("password").value;
+    const passwordConfirm = document.getElementById("password-confirm").value;
+    await (0, _updateSettings.updateSettings)({
+        passwordCurrent,
+        password,
+        passwordConfirm
+    }, "password");
+    savePasswordBtn.textContent = "Save Password";
+    document.getElementById("password-current").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("password-confirm").value = "";
 });
 
 },{"./login":"7yHem","./leaflet":"xvuTT","./updateSettings":"l3cGY"}],"7yHem":[function(require,module,exports) {
@@ -6052,24 +6073,22 @@ const displayMap = (locations)=>{
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l3cGY":[function(require,module,exports) {
 /* eslint-disable */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "updateData", ()=>updateData);
+parcelHelpers.export(exports, "updateSettings", ()=>updateSettings);
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
 var _alerts = require("./alerts");
 var _runtime = require("regenerator-runtime/runtime");
-const updateData = async (name, email)=>{
+const updateSettings = async (data, type)=>{
     try {
+        const url = type === "data" ? "http://127.0.0.1:3000/api/v1/users/updateMe" : "http://127.0.0.1:3000/api/v1/users/updateMyPassword";
         const res = await (0, _axiosDefault.default)({
             method: "PATCH",
-            url: "http://127.0.0.1:3000/api/v1/users/updateMe",
-            data: {
-                name: name,
-                email: email
-            }
+            url,
+            data
         });
         // check if the call was done successfully to diplay an alert
         // and redirect user to the homepage
-        if (res.data.status === "success") (0, _alerts.showAlert)("success", "Data updated successfully!");
+        if (res.data.status === "success") (0, _alerts.showAlert)("success", `${type.toUpperCase()} updated successfully!`);
     } catch (err) {
         (0, _alerts.showAlert)("error", err.response.data.message);
     }

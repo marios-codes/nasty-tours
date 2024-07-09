@@ -1,13 +1,15 @@
 /* eslint-disable */
 import { login, logout } from './login';
 import { displayMap } from './leaflet';
-import { updateData } from './updateSettings';
+import { updateSettings } from './updateSettings';
 
 // DOM Elements
 const leaflet = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const settingsForm = document.querySelector('.form-user-data');
+const passwordForm = document.querySelector('.form-user-password');
+const savePasswordBtn = document.querySelector('.btn--save-password');
 
 // Delegation
 if (leaflet) {
@@ -32,6 +34,24 @@ if (settingsForm) {
     element.preventDefault();
     const email = document.getElementById('email').value;
     const name = document.getElementById('name').value;
-    updateData(name, email);
+    updateSettings({ name, email }, 'data');
+  });
+}
+
+if (passwordForm) {
+  passwordForm.addEventListener('submit', async (element) => {
+    element.preventDefault();
+    savePasswordBtn.textContent = 'Updating...';
+    const passwordCurrent = document.getElementById('password-current').value;
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password-confirm').value;
+    await updateSettings(
+      { passwordCurrent, password, passwordConfirm },
+      'password'
+    );
+    savePasswordBtn.textContent = 'Save Password';
+    document.getElementById('password-current').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('password-confirm').value = '';
   });
 }
