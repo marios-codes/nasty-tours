@@ -22,7 +22,11 @@ router.get(
   userController.getMe, // use this middleware to get the current user id
   userController.getUser
 );
-router.patch('/updateMe', userController.updateMe);
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteMe', userController.deleteMe);
 
 // Just like the protect middleware above, all routes below are restricted to 'admin' user role

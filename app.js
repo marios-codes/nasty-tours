@@ -93,7 +93,7 @@ app.use(
 
 // Test middleware
 app.use((req, res, next) => {
-  console.log(req.cookies); // from cookie-parser package
+  // console.log(req.cookies); // from cookie-parser package
   next();
 });
 
