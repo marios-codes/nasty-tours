@@ -60,6 +60,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   // Create a filter that contains only the fields that a user is allowed to update for security reasons.
   // For example a user should not be able to change their 'role' to 'admin'
   const filteredBody = filterObj(req.body, 'name', 'email');
+  // If user updates their photo, then we want to store the filename only to our database
+  if (req.file) filteredBody.photo = req.file.filename;
+
+  // 3) Update the document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     runValidators: true,
     new: true, // returns the updated user in response
