@@ -2,6 +2,7 @@
 import { login, logout } from './login';
 import { displayMap } from './leaflet';
 import { updateSettings } from './updateSettings';
+import { bookTour } from './stripe';
 
 // DOM Elements
 const leaflet = document.getElementById('map');
@@ -10,6 +11,7 @@ const logOutBtn = document.querySelector('.nav__el--logout');
 const settingsForm = document.querySelector('.form-user-data');
 const passwordForm = document.querySelector('.form-user-password');
 const savePasswordBtn = document.querySelector('.btn--save-password');
+const bookTourBtn = document.getElementById('book-tour');
 
 // Delegation
 if (leaflet) {
@@ -56,5 +58,15 @@ if (passwordForm) {
     document.getElementById('password-current').value = '';
     document.getElementById('password').value = '';
     document.getElementById('password-confirm').value = '';
+  });
+}
+
+if (bookTourBtn) {
+  bookTourBtn.addEventListener('click', (element) => {
+    element.target.textContent = 'Processing...';
+    // In this way we get the 'data-tour-id' value from tour.pug included button
+    // JS automatically tranforms tour-id to tourId, so dash to camelCase and the word data is ommited. WTF?
+    const tourId = element.target.dataset.tourId;
+    bookTour(tourId);
   });
 }

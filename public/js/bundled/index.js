@@ -587,6 +587,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 /* eslint-disable */ var _login = require("./login");
 var _leaflet = require("./leaflet");
 var _updateSettings = require("./updateSettings");
+var _stripe = require("./stripe");
 // DOM Elements
 const leaflet = document.getElementById("map");
 const loginForm = document.querySelector(".form--login");
@@ -594,6 +595,7 @@ const logOutBtn = document.querySelector(".nav__el--logout");
 const settingsForm = document.querySelector(".form-user-data");
 const passwordForm = document.querySelector(".form-user-password");
 const savePasswordBtn = document.querySelector(".btn--save-password");
+const bookTourBtn = document.getElementById("book-tour");
 // Delegation
 if (leaflet) {
     // Get locations from HTML
@@ -631,8 +633,15 @@ if (passwordForm) passwordForm.addEventListener("submit", async (element)=>{
     document.getElementById("password").value = "";
     document.getElementById("password-confirm").value = "";
 });
+if (bookTourBtn) bookTourBtn.addEventListener("click", (element)=>{
+    element.target.textContent = "Processing...";
+    // In this way we get the 'data-tour-id' value from tour.pug included button
+    // JS automatically tranforms tour-id to tourId, so dash to camelCase and the word data is ommited. WTF?
+    const tourId = element.target.dataset.tourId;
+    (0, _stripe.bookTour)(tourId);
+});
 
-},{"./login":"7yHem","./leaflet":"xvuTT","./updateSettings":"l3cGY"}],"7yHem":[function(require,module,exports) {
+},{"./login":"7yHem","./leaflet":"xvuTT","./updateSettings":"l3cGY","./stripe":"10tSC"}],"7yHem":[function(require,module,exports) {
 /* eslint-disable */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
@@ -6093,6 +6102,158 @@ const updateSettings = async (data, type)=>{
     }
 };
 
-},{"axios":"jo6P5","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./alerts":"6Mcnf"}]},["gTVKZ","f2QDv"], "f2QDv", "parcelRequire11c7")
+},{"axios":"jo6P5","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./alerts":"6Mcnf"}],"10tSC":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "bookTour", ()=>bookTour);
+var _axios = require("axios");
+var _axiosDefault = parcelHelpers.interopDefault(_axios);
+var _alerts = require("./alerts");
+var _stripeJs = require("@stripe/stripe-js");
+const bookTour = async (tourId)=>{
+    const stripe = await (0, _stripeJs.loadStripe)("pk_test_51PdWHLRpcsTyyjeNzSQf4eTogmkyvcq0k74gyb9XXcsQo08dxnhdMO4yesoOR6htvj5ROSavq2EpEK20daApbPze00RrRuD3Zv");
+    // 1) Get checkout session from API
+    try {
+        const session = await (0, _axiosDefault.default)(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`);
+        console.log(session);
+        // 2) Create checkout form + charge credit card
+        await stripe.redirectToCheckout({
+            sessionId: session.data.session.id
+        });
+    // window.location.replace(session.data.session.url);
+    } catch (err) {
+        console.log(err);
+        (0, _alerts.showAlert)("error", err);
+    }
+};
+
+},{"axios":"jo6P5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./alerts":"6Mcnf","@stripe/stripe-js":"8ZdZI"}],"8ZdZI":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _indexMjs = require("../dist/index.mjs");
+parcelHelpers.exportAll(_indexMjs, exports);
+
+},{"../dist/index.mjs":"dHqHx","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dHqHx":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "loadStripe", ()=>loadStripe);
+var V3_URL = "https://js.stripe.com/v3";
+var V3_URL_REGEX = /^https:\/\/js\.stripe\.com\/v3\/?(\?.*)?$/;
+var EXISTING_SCRIPT_MESSAGE = "loadStripe.setLoadParameters was called but an existing Stripe.js script already exists in the document; existing script parameters will be used";
+var findScript = function findScript() {
+    var scripts = document.querySelectorAll('script[src^="'.concat(V3_URL, '"]'));
+    for(var i = 0; i < scripts.length; i++){
+        var script = scripts[i];
+        if (!V3_URL_REGEX.test(script.src)) continue;
+        return script;
+    }
+    return null;
+};
+var injectScript = function injectScript(params) {
+    var queryString = params && !params.advancedFraudSignals ? "?advancedFraudSignals=false" : "";
+    var script = document.createElement("script");
+    script.src = "".concat(V3_URL).concat(queryString);
+    var headOrBody = document.head || document.body;
+    if (!headOrBody) throw new Error("Expected document.body not to be null. Stripe.js requires a <body> element.");
+    headOrBody.appendChild(script);
+    return script;
+};
+var registerWrapper = function registerWrapper(stripe, startTime) {
+    if (!stripe || !stripe._registerWrapper) return;
+    stripe._registerWrapper({
+        name: "stripe-js",
+        version: "4.0.0",
+        startTime: startTime
+    });
+};
+var stripePromise = null;
+var onErrorListener = null;
+var onLoadListener = null;
+var onError = function onError(reject) {
+    return function() {
+        reject(new Error("Failed to load Stripe.js"));
+    };
+};
+var onLoad = function onLoad(resolve, reject) {
+    return function() {
+        if (window.Stripe) resolve(window.Stripe);
+        else reject(new Error("Stripe.js not available"));
+    };
+};
+var loadScript = function loadScript(params) {
+    // Ensure that we only attempt to load Stripe.js at most once
+    if (stripePromise !== null) return stripePromise;
+    stripePromise = new Promise(function(resolve, reject) {
+        if (typeof window === "undefined" || typeof document === "undefined") {
+            // Resolve to null when imported server side. This makes the module
+            // safe to import in an isomorphic code base.
+            resolve(null);
+            return;
+        }
+        if (window.Stripe && params) console.warn(EXISTING_SCRIPT_MESSAGE);
+        if (window.Stripe) {
+            resolve(window.Stripe);
+            return;
+        }
+        try {
+            var script = findScript();
+            if (script && params) console.warn(EXISTING_SCRIPT_MESSAGE);
+            else if (!script) script = injectScript(params);
+            else if (script && onLoadListener !== null && onErrorListener !== null) {
+                var _script$parentNode;
+                // remove event listeners
+                script.removeEventListener("load", onLoadListener);
+                script.removeEventListener("error", onErrorListener); // if script exists, but we are reloading due to an error,
+                // reload script to trigger 'load' event
+                (_script$parentNode = script.parentNode) === null || _script$parentNode === void 0 || _script$parentNode.removeChild(script);
+                script = injectScript(params);
+            }
+            onLoadListener = onLoad(resolve, reject);
+            onErrorListener = onError(reject);
+            script.addEventListener("load", onLoadListener);
+            script.addEventListener("error", onErrorListener);
+        } catch (error) {
+            reject(error);
+            return;
+        }
+    }); // Resets stripePromise on error
+    return stripePromise["catch"](function(error) {
+        stripePromise = null;
+        return Promise.reject(error);
+    });
+};
+var initStripe = function initStripe(maybeStripe, args, startTime) {
+    if (maybeStripe === null) return null;
+    var stripe = maybeStripe.apply(undefined, args);
+    registerWrapper(stripe, startTime);
+    return stripe;
+}; // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+var stripePromise$1;
+var loadCalled = false;
+var getStripePromise = function getStripePromise() {
+    if (stripePromise$1) return stripePromise$1;
+    stripePromise$1 = loadScript(null)["catch"](function(error) {
+        // clear cache on error
+        stripePromise$1 = null;
+        return Promise.reject(error);
+    });
+    return stripePromise$1;
+}; // Execute our own script injection after a tick to give users time to do their
+// own script injection.
+Promise.resolve().then(function() {
+    return getStripePromise();
+})["catch"](function(error) {
+    if (!loadCalled) console.warn(error);
+});
+var loadStripe = function loadStripe() {
+    for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
+    loadCalled = true;
+    var startTime = Date.now(); // if previous attempts are unsuccessful, will re-load script
+    return getStripePromise().then(function(maybeStripe) {
+        return initStripe(maybeStripe, args, startTime);
+    });
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["gTVKZ","f2QDv"], "f2QDv", "parcelRequire11c7")
 
 //# sourceMappingURL=index.js.map

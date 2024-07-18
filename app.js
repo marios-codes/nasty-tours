@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorController = require('./controllers/errorController');
@@ -19,14 +20,40 @@ const app = express();
 
 // Set security HTTP headers
 // Further HELMET configuration for Security Policy (CSP)
-const scriptSrcUrls = ['https://unpkg.com/', 'https://tile.openstreetmap.org'];
-const styleSrcUrls = [
-  'https://unpkg.com/',
-  'https://tile.openstreetmap.org',
-  'https://fonts.googleapis.com/',
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
+// Further HELMET configuration for Security Policy (CSP)
+const scriptSrcUrls = [
+  'https://*.leaflet.com/',
+  'https://*.cloudflare.com',
+  'https://js.stripe.com/v3/',
+  'https://checkout.stripe.com',
 ];
-const connectSrcUrls = ['https://unpkg.com', 'https://tile.openstreetmap.org'];
+const styleSrcUrls = [
+  'https://*.leafet.com/',
+  'https://api.tiles.leaflet.com/',
+  'https://*.cloudflare.com',
+  'https://fonts.googleapis.com/',
+  'https://www.myfonts.com/fonts/radomir-tinkov/gilroy/*',
+  ' checkout.stripe.com',
+];
+const connectSrcUrls = [
+  'https://*.leaflet.com/',
+  'https://*.cloudflare.com',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:52191',
+  'ws://127.0.0.1:1234',
+  '*.stripe.com',
+];
+
+const imgSrcUrls = ['https://*.tile.openstreetmap.org'];
+
 const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -36,12 +63,12 @@ app.use(
       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
       workerSrc: ["'self'", 'blob:'],
       objectSrc: [],
-      imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
+      imgSrc: ["'self'", 'blob:', 'data:', ...imgSrcUrls],
       fontSrc: ["'self'", ...fontSrcUrls],
+      frameSrc: ['*.stripe.com', '*.stripe.network'],
     },
   })
 );
-
 // setup pug, our template engine
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -102,6 +129,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on the server!`, 404));
