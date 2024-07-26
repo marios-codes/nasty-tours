@@ -654,7 +654,7 @@ const login = async (email, password)=>{
     try {
         const res = await (0, _axiosDefault.default)({
             method: "POST",
-            url: "http://127.0.0.1:3000/api/v1/users/login",
+            url: "/api/v1/users/login",
             data: {
                 email: email,
                 password: password
@@ -676,7 +676,7 @@ const logout = async ()=>{
     try {
         const res = await (0, _axiosDefault.default)({
             method: "GET",
-            url: "http://127.0.0.1:3000/api/v1/users/logout"
+            url: "/api/v1/users/logout"
         });
         // check if the call was done successfully to diplay an alert
         // and redirect user to the homepage
@@ -6088,7 +6088,7 @@ var _alerts = require("./alerts");
 var _runtime = require("regenerator-runtime/runtime");
 const updateSettings = async (data, type)=>{
     try {
-        const url = type === "data" ? "http://127.0.0.1:3000/api/v1/users/updateMe" : "http://127.0.0.1:3000/api/v1/users/updateMyPassword";
+        const url = type === "data" ? "/api/v1/users/updateMe" : "/api/v1/users/updateMyPassword";
         const res = await (0, _axiosDefault.default)({
             method: "PATCH",
             url,
@@ -6114,7 +6114,7 @@ const bookTour = async (tourId)=>{
     const stripe = await (0, _stripeJs.loadStripe)("pk_test_51PdWHLRpcsTyyjeNzSQf4eTogmkyvcq0k74gyb9XXcsQo08dxnhdMO4yesoOR6htvj5ROSavq2EpEK20daApbPze00RrRuD3Zv");
     // 1) Get checkout session from API
     try {
-        const session = await (0, _axiosDefault.default)(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`);
+        const session = await (0, _axiosDefault.default)(`/api/v1/bookings/checkout-session/${tourId}`);
         // console.log(session);
         // 2) Create checkout form + charge credit card
         await stripe.redirectToCheckout({
