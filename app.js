@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const { xss } = require('express-xss-sanitizer');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -123,6 +124,9 @@ app.use((req, res, next) => {
   // console.log(req.cookies); // from cookie-parser package
   next();
 });
+
+// Middleware to greatly compress text responses from our server
+app.use(compression());
 
 // 3) ROUTES (MOUNTING ROUTES)
 app.use('/', viewRouter);
