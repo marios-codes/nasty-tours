@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { login, logout } from './login';
+import { signup } from './signup';
 import { displayMap } from './leaflet';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
@@ -7,6 +8,7 @@ import { bookTour } from './stripe';
 // DOM Elements
 const leaflet = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
+const signUpForm = document.querySelector('.form--signup');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const settingsForm = document.querySelector('.form-user-data');
 const passwordForm = document.querySelector('.form-user-password');
@@ -26,6 +28,17 @@ if (loginForm) {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     login(email, password);
+  });
+}
+
+if (signUpForm) {
+  signUpForm.addEventListener('submit', (element) => {
+    element.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password-confirm').value;
+    signup(name, email, password, passwordConfirm);
   });
 }
 

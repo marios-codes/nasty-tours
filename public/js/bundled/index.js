@@ -585,12 +585,14 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"f2QDv":[function(require,module,exports) {
 /* eslint-disable */ var _login = require("./login");
+var _signup = require("./signup");
 var _leaflet = require("./leaflet");
 var _updateSettings = require("./updateSettings");
 var _stripe = require("./stripe");
 // DOM Elements
 const leaflet = document.getElementById("map");
 const loginForm = document.querySelector(".form--login");
+const signUpForm = document.querySelector(".form--signup");
 const logOutBtn = document.querySelector(".nav__el--logout");
 const settingsForm = document.querySelector(".form-user-data");
 const passwordForm = document.querySelector(".form-user-password");
@@ -607,6 +609,14 @@ if (loginForm) loginForm.addEventListener("submit", (element)=>{
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     (0, _login.login)(email, password);
+});
+if (signUpForm) signUpForm.addEventListener("submit", (element)=>{
+    element.preventDefault();
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const passwordConfirm = document.getElementById("password-confirm").value;
+    (0, _signup.signup)(name, email, password, passwordConfirm);
 });
 if (logOutBtn) logOutBtn.addEventListener("click", (0, _login.logout));
 if (settingsForm) settingsForm.addEventListener("submit", (element)=>{
@@ -641,7 +651,7 @@ if (bookTourBtn) bookTourBtn.addEventListener("click", (element)=>{
     (0, _stripe.bookTour)(tourId);
 });
 
-},{"./login":"7yHem","./leaflet":"xvuTT","./updateSettings":"l3cGY","./stripe":"10tSC"}],"7yHem":[function(require,module,exports) {
+},{"./login":"7yHem","./leaflet":"xvuTT","./updateSettings":"l3cGY","./stripe":"10tSC","./signup":"fNY2o"}],"7yHem":[function(require,module,exports) {
 /* eslint-disable */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
@@ -6254,6 +6264,39 @@ var loadStripe = function loadStripe() {
     });
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["gTVKZ","f2QDv"], "f2QDv", "parcelRequire11c7")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fNY2o":[function(require,module,exports) {
+/* eslint-disable */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "signup", ()=>signup);
+var _axios = require("axios");
+var _axiosDefault = parcelHelpers.interopDefault(_axios);
+var _runtime = require("regenerator-runtime/runtime");
+var _alerts = require("./alerts");
+const signup = async (name, email, password, passwordConfirm)=>{
+    try {
+        const res = await (0, _axiosDefault.default)({
+            method: "POST",
+            url: "/api/v1/users/signup",
+            data: {
+                name: name,
+                email: email,
+                password: password,
+                passwordConfirm: passwordConfirm
+            }
+        });
+        // check if the call was done successfully to diplay an alert
+        // and redirect user to the homepage
+        if (res.data.status === "success") {
+            (0, _alerts.showAlert)("success", "Signed up successfully!");
+            window.setTimeout(()=>{
+                location.assign("/");
+            }, 1500);
+        }
+    } catch (err) {
+        (0, _alerts.showAlert)("error", err.response.data.message);
+    }
+};
+
+},{"axios":"jo6P5","regenerator-runtime/runtime":"dXNgZ","./alerts":"6Mcnf","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["gTVKZ","f2QDv"], "f2QDv", "parcelRequire11c7")
 
 //# sourceMappingURL=index.js.map

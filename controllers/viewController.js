@@ -46,6 +46,12 @@ exports.getLoginForm = (req, res) => {
     });
 };
 
+exports.getSignUpForm = (req, res) => {
+  res.status(200).render('signup', {
+    title: 'Create your account',
+  });
+};
+
 exports.getAccount = (req, res) => {
   // we don't need next() or anything as we get the user
   // from the protect middleware in viewRoutes
