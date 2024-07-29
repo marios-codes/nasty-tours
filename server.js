@@ -40,3 +40,11 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
+
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED! Shutting down gracefully');
+  // Closing the server after finishing all the pending requests.
+  server.close(() => {
+    console.log('❌ Process terminated!');
+  });
+});
