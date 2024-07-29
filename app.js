@@ -8,6 +8,7 @@ const { xss } = require('express-xss-sanitizer');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -18,6 +19,21 @@ const AppError = require('./utils/appError');
 const globalErrorController = require('./controllers/errorController');
 
 const app = express();
+
+// setup pug, our template engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// 1) GLOBAL MIDDLEWARES
+// Implement CORS
+app.use(cors());
+
+// 'options' is just another type of request such as get, post, put, delete etc
+// So here is like calling app.get() or app.post() but with the options type of request
+// An option request is sent by the browser when there is a preflight phase
+app.options('*', cors());
+// Another example if we wanted to implemented it for a specific route would be:
+// app.options('/api/v1/tours/:id', cors());
 
 // Set security HTTP headers
 // Further HELMET configuration for Security Policy (CSP)
@@ -70,11 +86,6 @@ app.use(
     },
   })
 );
-// setup pug, our template engine
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
-
-// 1) GLOBAL MIDDLEWARES
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
