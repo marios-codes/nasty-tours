@@ -17,6 +17,7 @@ const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorController = require('./controllers/errorController');
+const bookingController = require('./controllers/bookingController');
 
 const app = express();
 
@@ -104,6 +105,15 @@ const limiter = rateLimit({
 });
 
 app.use('/api', limiter);
+
+// Stripe checkout webhook
+//  NOTE we need the response in raw format and not json. This is why we put this router here,
+// above the json middleware below
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
 
 // Body parser. Reads data from body into req.body
 app.use(express.json({ limit: '10kb' }));
