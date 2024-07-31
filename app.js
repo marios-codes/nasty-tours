@@ -66,6 +66,7 @@ const connectSrcUrls = [
   'http://127.0.0.1:52191',
   'ws://127.0.0.1:1234',
   '*.stripe.com',
+  'wss://nasty-tours.onrender.com:1234/',
 ];
 
 const imgSrcUrls = ['https://*.tile.openstreetmap.org'];
