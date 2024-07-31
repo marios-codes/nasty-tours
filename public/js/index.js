@@ -4,6 +4,7 @@ import { signup } from './signup';
 import { displayMap } from './leaflet';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
+import { showAlert } from './alerts';
 
 // DOM Elements
 const leaflet = document.getElementById('map');
@@ -14,6 +15,7 @@ const settingsForm = document.querySelector('.form-user-data');
 const passwordForm = document.querySelector('.form-user-password');
 const savePasswordBtn = document.querySelector('.btn--save-password');
 const bookTourBtn = document.getElementById('book-tour');
+const alertMessage = document.querySelector('body').dataset.alert;
 
 // Delegation
 if (leaflet) {
@@ -83,3 +85,6 @@ if (bookTourBtn) {
     bookTour(tourId);
   });
 }
+
+// Show alert when returning to My Bookings after successful stripe checkout
+if (alertMessage) showAlert('success', alertMessage, 20);
