@@ -1,6 +1,7 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
+const bookingRouter = require('./bookingRoutes');
 
 const router = express.Router();
 
@@ -42,5 +43,7 @@ router
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
+
+router.use('/:userId/bookings', bookingRouter);
 
 module.exports = router;
