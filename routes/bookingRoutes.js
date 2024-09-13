@@ -2,7 +2,7 @@ const express = require('express');
 const bookingController = require('../controllers/bookingController');
 const authController = require('../controllers/authController');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true }); // we set mergeParams to true in order to have access to the tourId on tourRoutes.js in the bookingRoutes middleware
 
 // Middleware to be used for all the following routes
 router.use(authController.protect);
