@@ -37,7 +37,7 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-// Create a compound index with a unique option set to true in order to avoid duplicate reviews
+// Create a compound index with a unique option set to true in order to avoid duplicate reviews from the same user
 // duplicate reviews = same userId + same tourId, so:
 reviewSchema.index({ review: 1, user: 1 }, { unique: true });
 

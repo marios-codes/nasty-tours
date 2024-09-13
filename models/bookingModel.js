@@ -25,6 +25,10 @@ const bookingSchema = new mongoose.Schema({
   },
 });
 
+// Create a compound index with a unique option set to true in order to avoid duplicate bookings from the same user
+// duplicate bookings = same userId + same tourId, so:
+bookingSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // QUERY middleware
 bookingSchema.pre(/^find/, function (next) {
   this.populate('user').populate({
